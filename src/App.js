@@ -6,6 +6,9 @@ import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+import './app.css'
+import TogglableTextbox from "./components/TogglableTextbox";
+
 class App extends React.Component {
     constructor(props) {
         super(props)
@@ -18,7 +21,8 @@ class App extends React.Component {
             title: '',
             author: '',
             url: '',
-            addFormVisible: false
+            addFormVisible: false,
+            notification: ''
         }
     }
 
@@ -47,41 +51,45 @@ class App extends React.Component {
             blogService.setToken(user.token)
             this.setState({username: '', password: '', user})
         } catch (exception) {
-            this.setState({
-                error: 'käyttäjätunnus tai salasana virheellinen',
-            })
+            this.notification(`virhe tunnistautumisessa`)
             setTimeout(() => {
-                this.setState({error: null})
+                this.setState({notification: null})
             }, 5000)
         }
     }
 
-    addBlog = (e) => {
-        e.preventDefault()
+    addBlog = async (event) => {
+        event.preventDefault()
         this.blogForm.toggleVisibility()
-        console.log(this.state.title)
         try {
             const blogObject = {
                 title: this.state.title,
                 author: this.state.author,
                 url: this.state.url
             }
-            console.log(blogObject)
-            blogService
-                .create(blogObject)
-                .then(newBlog => {
-                    this.setState({
+
+            const newBlog = await blogService.create(blogObject)
+            this.notification(`a new blog ${this.state.title} by ${this.state.author} was added succesfully!`)
+            this.setState({
                         blogs: this.state.blogs.concat(newBlog),
                         title: '',
                         author: '',
                         url: ''
-                    })
-                })
-
+            })
         } catch (exception) {
+            this.notification(`blog addition failed`)
             console.log(exception)
         }
 
+    }
+
+    notification = (message) => {
+        this.setState({
+            notification: message
+        })
+        setTimeout(() => {
+            this.setState({ notification: null })
+        }, 7000);
     }
 
     handleFieldChange = (event) => {
@@ -96,6 +104,7 @@ class App extends React.Component {
         if (this.state.user === null) {
             return (
                 <div>
+                    <Notification notification={this.state.notification} />
                     <h2>Kirjaudu sovellukseen</h2>
                     <form onSubmit={this.login}>
                         <div>
@@ -126,14 +135,16 @@ class App extends React.Component {
         return (
             <div>
                 <h2>blogs</h2>
-                <Notification message={this.state.error} />
+                <Notification notification={this.state.notification} />
                 <div>{this.state.user.name} logged in <form onSubmit={this.logout}>
                     <button type="submit" name="logout" onClick={this.handleLogout}>logout</button>
                 </form></div>
 
                 <div>
                     {this.state.blogs.map(blog =>
-                        <Blog key={blog._id} blog={blog}/>
+                        <TogglableTextbox header={blog.title} key={blog._id} ref={component => blog = component}>
+                            <Blog blog={blog} />
+                        </TogglableTextbox>
                     )}
                 </div>
 
@@ -146,6 +157,7 @@ class App extends React.Component {
                         url={this.state.url}
                     />
                 </Togglable>
+
 
             </div>
         )
