@@ -5,7 +5,7 @@ const Blog = ({blog}) => (
       {blog.title}<br /><a href={blog.url}>{blog.url}</a><br />
       {blog.author}<br />
       <form>{blog.likes}</form>
-  </div>  
+  </div>
 )
 
 export default Blog

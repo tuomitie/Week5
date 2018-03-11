@@ -25,13 +25,13 @@ class TogglableTextbox extends React.Component {
         }
 
         return (
-            <div style={blogStyle} key={this.props.id}>
+            <div style={blogStyle} className="p-2" key={this.props.id}>
                 <div style={hideWhenVisible}>
                     <div onClick={this.toggleVisibility}>{this.props.header}</div>
                 </div>
                 <div style={showWhenVisible}>
                     <div onClick={this.toggleVisibility}>{this.props.children}
-                    <button type="submit">like</button>
+                    <button type="submit" className="btn">like</button>
                     </div>
                 </div>
             </div>
